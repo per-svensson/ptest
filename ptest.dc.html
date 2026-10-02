@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>ptest · Todo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+html,body{margin:0;background:#f4f2ee;color:#4a4843;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:oklch(0.55 0.13 250);text-decoration:none}
+a:hover{color:oklch(0.48 0.13 250);text-decoration:underline}
+input::placeholder{color:#8a877f}
+input:focus{outline:none}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <header style="background:#fff;border-bottom:1px solid #e3e0d9">
+    <div style="max-width:960px;margin:0 auto;padding:0 24px;height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="width:14px;height:14px;border-radius:4px;background:oklch(0.55 0.13 250)"></span>
+        <span style="font-size:18px;font-weight:600;color:#1c1b19">ptest</span>
+      </div>
+      <nav style="display:flex;align-items:center;gap:20px;font-size:15px;font-weight:400">
+        <a href="#workflow" style="color:#1c1b19">How it was made</a>
+        <span style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.58 0.13 150);background:#f4f2ee;border-radius:999px;padding:6px 12px">{{ buildLabel }}</span>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:960px;width:100%;margin:0 auto;padding:64px 24px 96px;display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.55 0.13 250)">Placeholder app</div>
+      <h1 style="margin:0;font-size:clamp(36px,5vw,56px);line-height:1.05;font-weight:600;letter-spacing:-0.01em;color:#1c1b19">Today's tasks</h1>
+      <p style="margin:0;font-size:18px;line-height:1.55;max-width:560px;text-wrap:pretty">A minimal todo list, designed in Claude Design and published to GitHub Pages. Tasks are saved in your browser.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e3e0d9;border-radius:16px;box-shadow:0 4px 12px rgba(28,27,25,0.08);overflow:hidden">
+      <form onSubmit="{{ add }}" style="display:flex;gap:12px;padding:20px;border-bottom:1px solid #e3e0d9">
+        <input value="{{ draft }}" onChange="{{ setDraft }}" placeholder="Add a task" aria-label="New task" style="flex:1;min-width:0;height:48px;padding:0 16px;font-family:inherit;font-size:16px;font-weight:400;color:#1c1b19;border:1px solid #e3e0d9;border-radius:8px;background:#fff" style-focus="border-color:oklch(0.55 0.13 250);box-shadow:0 0 0 3px oklch(0.55 0.13 250 / 0.35)">
+        <button type="submit" style="height:48px;padding:0 22px;border:0;border-radius:8px;background:oklch(0.55 0.13 250);color:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;flex:none" style-hover="background:oklch(0.48 0.13 250)" style-active="background:oklch(0.42 0.13 250)">Add task</button>
+      </form>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:#fff;border-bottom:1px solid #e3e0d9">
+        <div style="display:flex;gap:4px;background:#f4f2ee;border-radius:8px;padding:4px">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.select }}" style="border:0;border-radius:6px;padding:8px 14px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }};box-shadow:{{ f.shadow }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <span style="font-size:14px;font-weight:400;color:#4a4843">{{ remainingLabel }}</span>
+      </div>
+
+      <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+        <ul style="list-style:none;margin:0;padding:0">
+          <sc-for list="{{ visible }}" as="t" hint-placeholder-count="3">
+            <li style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid #f4f2ee" style-hover="background:#faf9f6">
+              <button onClick="{{ t.toggle }}" aria-label="{{ t.toggleLabel }}" style="width:24px;height:24px;flex:none;border-radius:6px;border:2px solid {{ t.boxBorder }};background:{{ t.boxBg }};cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center">
+                <span style="width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-1px) rotate(-45deg);opacity:{{ t.checkOpacity }}"></span>
+              </button>
+              <span style="flex:1;min-width:0;font-size:17px;font-weight:400;color:{{ t.textColor }};text-decoration:{{ t.strike }};overflow-wrap:anywhere">{{ t.text }}</span>
+              <button onClick="{{ t.remove }}" aria-label="Delete task" style="border:0;background:transparent;color:#8a877f;font-family:inherit;font-size:14px;font-weight:400;cursor:pointer;padding:8px;border-radius:6px;flex:none" style-hover="color:#C0392B;background:#f4f2ee">Delete</button>
+            </li>
+          </sc-for>
+        </ul>
+      </sc-if>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 20px;text-align:center;font-size:16px;color:#8a877f">{{ emptyLabel }}</div>
+      </sc-if>
+
+      <div style="display:flex;justify-content:flex-end;padding:12px 20px;background:#fff">
+        <button onClick="{{ clearDone }}" disabled="{{ noneDone }}" style="border:0;background:transparent;color:oklch(0.55 0.13 250);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:8px;opacity:{{ clearOpacity }}" style-hover="color:oklch(0.48 0.13 250)">Clear completed</button>
+      </div>
+    </div>
+  </main>
+
+  <sc-if value="{{ showWorkflow }}" hint-placeholder-val="{{ true }}">
+    <section id="workflow" style="background:#1c1b19;color:#fff;padding:96px 24px">
+      <div style="max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:40px">
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:600px">
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.8 0.08 250)">How this was made</div>
+          <h2 style="margin:0;font-size:36px;line-height:1.15;font-weight:600;color:#fff">From prompt to published in four steps</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:20px">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <div style="border:1px solid rgba(255,255,255,0.14);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:14px;font-weight:600;color:oklch(0.8 0.1 150);font-family:Menlo,Consolas,monospace">{{ s.n }}</span>
+              <span style="font-size:20px;font-weight:600;color:#fff">{{ s.title }}</span>
+              <span style="font-size:16px;line-height:1.55;color:#e3e0d9">{{ s.body }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <footer style="background:#fff;border-top:1px solid #e3e0d9;padding:28px 24px">
+    <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:14px;font-weight:400;color:#8a877f">
+      <span>ptest · Claude Design POC</span>
+      <a href="https://github.com/per-svensson/ptest">github.com/per-svensson/ptest</a>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;buildLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;v0.1 · live&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showWorkflow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { items: null, draft: '', filter: 'all' };
+  key = 'ptest.todos.v1';
+  componentDidMount() {
+    let items;
+    try { items = JSON.parse(localStorage.getItem(this.key)); } catch (e) {}
+    if (!Array.isArray(items)) items = [
+      { id: 1, text: 'Design the app in Claude Design', done: true },
+      { id: 2, text: 'Commit source files to GitHub', done: false },
+      { id: 3, text: 'Check the live site on GitHub Pages', done: false }
+    ];
+    this.setState({ items });
+  }
+  save(items) {
+    this.setState({ items });
+    try { localStorage.setItem(this.key, JSON.stringify(items)); } catch (e) {}
+  }
+  renderVals() {
+    const items = this.state.items || [];
+    const { filter, draft } = this.state;
+    const visible = items.filter(t => filter === 'all' || (filter === 'active' ? !t.done : t.done));
+    const remaining = items.filter(t => !t.done).length;
+    const doneCount = items.length - remaining;
+    return {
+      buildLabel: this.props.buildLabel ?? 'v0.1 · live',
+      showWorkflow: this.props.showWorkflow ?? true,
+      draft,
+      setDraft: e => this.setState({ draft: e.target.value }),
+      add: e => {
+        e.preventDefault();
+        const text = draft.trim();
+        if (!text) return;
+        this.save([...items, { id: Date.now(), text, done: false }]);
+        this.setState({ draft: '' });
+      },
+      filters: [['all', 'All'], ['active', 'Active'], ['done', 'Completed']].map(([id, label]) => {
+        const on = filter === id;
+        return { label, bg: on ? '#fff' : 'transparent', fg: on ? '#1c1b19' : '#4a4843', shadow: on ? '0 1px 2px rgba(28,27,25,0.12)' : 'none', select: () => this.setState({ filter: id }) };
+      }),
+      remainingLabel: remaining === 1 ? '1 task left' : remaining + ' tasks left',
+      hasItems: visible.length > 0,
+      isEmpty: visible.length === 0,
+      emptyLabel: items.length === 0 ? 'No tasks yet. Add one above.' : 'Nothing here.',
+      visible: visible.map(t => ({
+        text: t.text,
+        toggleLabel: t.done ? 'Mark as not done' : 'Mark as done',
+        boxBorder: t.done ? 'oklch(0.58 0.13 150)' : '#8a877f',
+        boxBg: t.done ? 'oklch(0.58 0.13 150)' : '#fff',
+        checkOpacity: t.done ? 1 : 0,
+        textColor: t.done ? '#8a877f' : '#1c1b19',
+        strike: t.done ? 'line-through' : 'none',
+        toggle: () => this.save(items.map(x => x.id === t.id ? { ...x, done: !x.done } : x)),
+        remove: () => this.save(items.filter(x => x.id !== t.id))
+      })),
+      noneDone: doneCount === 0,
+      clearOpacity: doneCount === 0 ? 0.4 : 1,
+      clearDone: () => this.save(items.filter(x => !x.done)),
+      steps: [
+        { n: '01', title: 'Design', body: 'Build and iterate on ptest.dc.html in Claude Design.' },
+        { n: '02', title: 'Sync', body: 'Download the project or hand off to Claude Code; the source files go into the repo unchanged.' },
+        { n: '03', title: 'Commit', body: 'Push to main on per-svensson/ptest.' },
+        { n: '04', title: 'Publish', body: 'A GitHub Actions workflow copies the source to the Pages site on every push.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
